@@ -1,0 +1,144 @@
+
+    // tworzenie grafu sceny
+    std::shared_ptr<GameObject> root =   std::make_shared<GameObject>(GameObject("root"));// tworzenie gameObjectu ROOT
+    std::shared_ptr<GameObject> dwarfs = std::make_shared<GameObject>(GameObject(root, "dwarfs"));// tworzenie gameObjectu dwarfs jako dziecko ground
+    std::shared_ptr<GameObject> dwarf1 = std::make_shared<GameObject>(GameObject(dwarfs, "dwarf1"));// tworzenie gameObjectu dwarf1 jako dziecko dwarfs
+    std::shared_ptr<GameObject> dwarf2 = std::make_shared<GameObject>(GameObject(dwarfs, "dwarf2"));// tworzenie gameObjectu dwarf2 jako dziecko dwarfs
+    std::shared_ptr<GameObject> level =  std::make_shared<GameObject>(GameObject(root, "level"));// tworzenie gameObjectu level jako dziecko ROOT
+    std::shared_ptr<GameObject> camera = std::make_shared<GameObject>(GameObject(root, "camera"));//tworzenie gameObjectu camera jako dziecko ROOT
+    std::shared_ptr<GameObject> ground = std::make_shared<GameObject>(GameObject(level, "ground"));// tworzenie gameObjectu ground jako dziecko level
+    std::shared_ptr<GameObject> platform1 = std::make_shared<GameObject>(GameObject(level, "platform1"));// tworzenie gameObjectu platform1 jako dziecko level
+    std::shared_ptr<GameObject> platform2 = std::make_shared<GameObject>(GameObject(level, "platform2"));// tworzenie gameObjectu platform1 jako dziecko level
+    std::shared_ptr<GameObject> light1 = std::make_shared<GameObject>(GameObject(level, "light1"));// tworzenie gameObjectu light1 jako dziecko level
+    std::shared_ptr<GameObject> light2 =  std::make_shared<GameObject>(GameObject(level, "light2"));// tworzenie gameObjectu light2 jako dziecko level
+    std::shared_ptr<GameObject> light3 = std::make_shared<GameObject>(GameObject(level, "light3"));// tworzenie gameObjectu light3 jako dziecko level
+    std::shared_ptr<GameObject> light4 = std::make_shared<GameObject>(GameObject(level, "light4"));// tworzenie gameObjectu light4 jako dziecko level
+    std::shared_ptr<GameObject> cog =    std::make_shared<GameObject>(GameObject(level, "cog"));// tworzenie gameObjectu dwarf1 jako dziecko level
+    std::shared_ptr<GameObject> billboard = std::make_shared<GameObject>(GameObject(level, "billboard"));// tworzenie gameObjectu dwarf1 jako dziecko level
+
+    root->AddChild(dwarfs);
+    dwarfs->AddChild(dwarf1);
+    dwarfs->AddChild(dwarf2);
+    root->AddChild(level);
+    root->AddChild(camera);
+    level->AddChild(ground);
+    level->AddChild(platform1);
+    level->AddChild(platform2);
+    level->AddChild(light1);
+    level->AddChild(light2);
+    level->AddChild(light3);
+    level->AddChild(light4);
+    level->AddChild(cog);
+    level->AddChild(billboard);
+
+    // load models
+    // -----------
+    ground->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj"))); 
+    platform1->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj")));
+    platform2->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj")));
+    dwarf1->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/dwarf/IronHillsDwarfSmollobj.obj")));
+    dwarf1->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/dwarf-fbx/dwarf.fbx")));
+
+
+
+    dwarf2->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/dwarf/IronHillsDwarfSmollobj.obj"))); 
+    light1->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj", 1, glm::vec3(1.0f, 0.0f, 0.0f))));
+    light2->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj", 1, glm::vec3(0.0f, 1.0f, 0.0f))));
+    light3->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj", 1, glm::vec3(0.0f, 0.0f, 1.0f))));
+    light4->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Ground/ground.obj", 1, glm::vec3(1.0f, 1.0f, 1.0f)))); 
+    cog->AddComponent(std::make_shared<MeshRenderer>(MeshRenderer("res/models/Cog/cog.fbx",2,glm::vec3(0.714f, 0.4284f, 0.18144f), 2.321928f, glm::vec3(0.393548f, 0.271906f, 0.166721f))));
+
+    // dodanie sprite rendererów
+    // ------------
+    billboard->AddComponent(std::make_shared<SpriteRenderer>(SpriteRenderer("res/textures/Wall/wall.jpg",4)));
+
+    // dodanie controllerów dla graczy
+    // ------------
+    dwarf1->AddComponent(std::make_shared<PlayerController>(PlayerController(GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_RIGHT, GLFW_KEY_LEFT, GLFW_KEY_KP_3, GLFW_KEY_KP_2)));
+    dwarf2->AddComponent(std::make_shared<PlayerController>(PlayerController(GLFW_KEY_W, GLFW_KEY_S, GLFW_KEY_D, GLFW_KEY_A, GLFW_KEY_E, GLFW_KEY_SPACE)));
+
+    // dodanie kontrolera kamery
+    // ------------
+    CAMERA.SetUp(glm::vec3(-9.0f, 15.0f, 9.0f));
+    camera->AddComponent(std::make_shared<CameraController>(CameraController(dwarf1, dwarf2)));
+    //camera->AddComponent(std::make_shared<CameraController>(CameraController(ground, ground)));
+	
+    // dodawanie ruchu do platform
+    // ------------
+    platform1->AddComponent(std::make_shared<SinMotion>(SinMotion(glm::vec3(0.0f, 0.0f, -8.0f), 2)));
+    platform2->AddComponent(std::make_shared<SinMotion>(SinMotion(glm::vec3(8.0f, 4.0f, 0.0f), 2)));
+
+    // dodawanie box colladerów
+    // ------------
+    dwarf1->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.5f, 1.0f, 0.5f),false)));
+    dwarf2->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 1.0f, 0.0f),glm::vec3(0.5f,1.0f,0.5f), false)));
+    ground->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(5.0f, 0.5f, 15.0f),true,false,GROUND)));
+    platform1->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 1.0f), true, false, GROUND)));
+    platform1->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 0.6f, 0.0f), glm::vec3(1.0f, 0.1f, 1.0f), true, true)));
+    platform2->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.5f, 1.0f), true, false, GROUND)));
+    platform2->AddComponent(std::make_shared<BoxCollider>(BoxCollider(glm::vec3(0.0f, 0.6f, 0.0f), glm::vec3(1.0f, 0.1f, 1.0f), true, true)));
+   
+    // dodanie player stick do platform
+    // ------------
+    platform2->AddComponent(std::make_shared<PlayerStick>(PlayerStick(platform2->GetComponent(SIN_MOTION))));
+    platform1->AddComponent(std::make_shared<PlayerStick>(PlayerStick(platform1->GetComponent(SIN_MOTION))));
+
+    // dodawanie point lightów
+    
+    //light1->AddComponent(std::make_shared<PointLight>(PointLight(glm::vec3(1.0f, 0.0f, 0.0f),glm::vec3(1.0f), glm::vec3(0.0f),  0.1f, 0.5f, 0.1f)));
+    //light2->AddComponent(std::make_shared<PointLight>(PointLight(glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+    //light3->AddComponent(std::make_shared<PointLight>(PointLight(glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+   //light4->AddComponent(std::make_shared<PointLight>(PointLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+    
+    // spot Light test
+    light2->AddComponent(std::make_shared<SpotLight>(SpotLight(glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+    light3->AddComponent(std::make_shared<SpotLight>(SpotLight(glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+    light4->AddComponent(std::make_shared<SpotLight>(SpotLight(glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+    light1->AddComponent(std::make_shared<SpotLight>(SpotLight(glm::vec3(0.0f,-1.0f,0.0f),glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(1.0f), glm::vec3(0.0f), 0.1f, 0.5f, 0.1f)));
+    
+
+    // ustawianie transform�w
+    // ------------
+    dwarf1->m_transform->SetPosition(glm::vec3(1.5f, 0.0f, 0.0f));
+    dwarf1->m_transform->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    dwarf1->m_transform->SetRotation(0.0f, 0.0f, 0.0f);
+
+    dwarf2->m_transform->SetPosition(glm::vec3(-1.5f, 0.0f, 0.0f));
+    dwarf2->m_transform->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    dwarf2->m_transform->SetRotation(0.0f, 0.0f, 0.0f);
+
+    camera->m_transform->SetPosition(glm::vec3(-9.0f, 12.0f, 9.0f));
+    camera->m_transform->SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    camera->m_transform->SetRotation(0.0f, 0.0f, 0.0f);
+    //
+
+    ground->m_transform->SetPosition(glm::vec3(0.0f, -0.5f, 0.0f));
+    ground->m_transform->SetScale(glm::vec3(10.0f, 1.0f, 30.0f));
+    ground->m_transform->SetRotation(0.0f, 0.0f, 0.0f);
+
+    platform1->m_transform->SetPosition(glm::vec3(6.0f, -0.5f, 4.0f));
+    platform1->m_transform->SetScale(glm::vec3(2.0f, 1.0f, 2.0f));
+    platform1->m_transform->SetRotation(0.0f, 0.0f, 0.0f);
+
+    platform2->m_transform->SetPosition(glm::vec3(-4.0f, -0.5f, -6.0f));
+    platform2->m_transform->SetScale(glm::vec3(2.0f, 1.0f, 2.0f));
+    platform2->m_transform->SetRotation(0.0f, 0.0f, 0.0f);
+
+    light1->m_transform->SetPosition(glm::vec3(2.0f, 3.5f, 2.0f));
+    light2->m_transform->SetPosition(glm::vec3(2.0f, 3.5f, -2.0f));
+    light3->m_transform->SetPosition(glm::vec3(-2.0f, 3.5f, 2.0f));
+    light4->m_transform->SetPosition(glm::vec3(-2.0f, 3.5f, -2.0f));
+    light1->m_transform->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+    light1->m_transform->SetRotation(45.0f, 45.0f, 0.0f);
+    light2->m_transform->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+    light2->m_transform->SetRotation(45.0f, 45.0f, 0.0f);
+    light3->m_transform->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+    light3->m_transform->SetRotation(45.0f, 45.0f, 0.0f);
+    light4->m_transform->SetScale(glm::vec3(0.5f, 0.5f, 0.5f));
+    light4->m_transform->SetRotation(45.0f, 45.0f, 0.0f);
+    
+    billboard->m_transform->SetPosition(glm::vec3(0.0f, 2.0f, 0.0f));
+
+    // tymczasowo ustawiam obiekt obecnie zaznaczony na sztywno przed p�tl� gry
+    imguiSystem->SetSelectedObject(root);
+    imguiSystem->SetRootObject(root);
